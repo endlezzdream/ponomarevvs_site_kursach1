@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Профиль</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <div><a href="/" class="button">Главная</a></div>
+    <div>
+      <form method="POST" action="/delete_account" style="display:inline;" onsubmit="return confirm('Удалить аккаунт?');">
+        <button class="button" type="submit">Удалить аккаунт</button>
+      </form>
+      <a href="/logout" class="button">Выйти</a>
+    </div>
+  </header>
+
+  <div class="profile-box">
+    <div class="profile-left">
+      <img src="/static/{{ user.avatar }}" alt="Аватар">
+      <div class="username-label">{{ username }}</div>
+      <form method="POST" action="/upload_avatar" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="avatar" required>
+        <button class="button" type="submit">Загрузить аватар</button>
+      </form>
+    </div>
+    <div class="profile-right">
+      <div class="profile-posts-header">Мои посты ({{ posts|length }})</div>
+      <div style="margin-top: 20px;">
+        {% for post in posts %}
+          <div class="post">
+            {{ post.content }}
+            <form method="POST" action="/delete_post" style="margin-top:10px;">
+              <input type="hidden" name="post_id" value="{{ post.id }}">
+              <button class="button" type="submit">Удалить</button>
+            </form>
+          </div>
+        {% else %}
+          <p style="text-align:center;">Пока нет постов.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

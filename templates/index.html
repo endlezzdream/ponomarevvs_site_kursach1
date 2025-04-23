@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>Главная</title>
+</head>
+<body>
+  <header>
+    <div><a href="/" class="button">Главная</a></div>
+    <div>
+    {% if 'user_id' in session %}
+      <a href="/profile" class="button">Профиль</a>
+    {% else %}
+      <a href="/login" class="button">Вход</a>
+      <a href="/register" class="button">Регистрация</a>
+    {% endif %}
+    </div>
+  </header>
+
+  {% if 'user_id' in session %}
+    <div class="post-form-box">
+      <form method="POST" action="/create_post">
+        <textarea name="content" required placeholder="Напиши пост..."></textarea><br>
+        <button class="button" type="submit">Опубликовать</button>
+      </form>
+    </div>
+  {% else %}
+    <p style="text-align:center; margin-top: 40px;">Войдите, чтобы писать посты.</p>
+  {% endif %}
+
+  <div class="center-container">
+    {% for post in posts %}
+      {% set post_user = users[post.user_id] %}
+      <div class="post">
+        <img src="/static/{{ post_user.avatar }}" style="width:40px;height:40px;border-radius:50%;margin-right:10px;">
+        <strong>{{ post_user.username }}</strong><br>{{ post.content }}
+
+        <form method="POST" action="/like_post" style="margin-top:10px; display:inline-block;">
+          <input type="hidden" name="post_id" value="{{ post.id }}">
+          <input type="hidden" name="value" value="1">
+          <button class="button" type="submit">👍 {{ post.likes|selectattr("value", "equalto", 1)|list|length }}</button>
+        </form>
+        <form method="POST" action="/like_post" style="display:inline-block;">
+          <input type="hidden" name="post_id" value="{{ post.id }}">
+          <input type="hidden" name="value" value="-1">
+          <button class="button" type="submit">👎 {{ post.likes|selectattr("value", "equalto", -1)|list|length }}</button>
+        </form>
+
+        <form method="POST" action="/add_comment" style="margin-top:10px;">
+          <input type="hidden" name="post_id" value="{{ post.id }}">
+          <input type="text" name="comment" placeholder="Оставить комментарий" required>
+          <button class="button" type="submit">Комментировать</button>
+        </form>
+
+        <div style="margin-top:10px;">
+          {% for c in post.comments %}
+            {% set comment_user = users[c.user_id] %}
+            <div style="background:#f0f0f0; padding:5px; margin:5px;">
+              <img src="/static/{{ comment_user.avatar }}" style="width:30px;height:30px;border-radius:50%;margin-right:8px;">
+              <strong>{{ comment_user.username }}</strong><br>{{ c.content }}
+              {% if 'user_id' in session and comment_user.id == session['user_id'] %}
+              <form method="POST" action="/delete_comment" style="display:inline;">
+                <input type="hidden" name="comment_id" value="{{ c.id }}">
+                <button class="button" type="submit" style="padding:4px 8px; font-size:12px;">Удалить</button>
+              </form>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>
